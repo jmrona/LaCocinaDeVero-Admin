@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import '@fontsource-variable/inter';
+
+
+@theme {
+  --font-display: "Inter Variable", "sans-serif";
+  --font-accent: "SourGummy", "sans-serif";
+  --font-emoji: 'Segoe UI Emoji', 'Apple Color Emoji', 'Segoe UI Symbol', sans-serif;
+  --color-primary: #DC7218;
+  --color-secondary: #492919;
+  /* --color-neutral: #EDD3A4; */
+  --color-accent: #F8F8F8;
+}
+
+body {
+  font-family: var(--font-display);
+}

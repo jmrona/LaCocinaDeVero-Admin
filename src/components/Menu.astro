@@ -1,0 +1,22 @@
+---
+import { SignOutButton } from '@clerk/astro/components'
+import {LogOut, House, Beef, Wheat, ChartBarStacked} from '@lucide/astro'
+
+const isActive = (href: string) => {
+  return href === Astro.url.pathname;
+};
+
+const activeClass = "text-primary border-r-2 border-primary";
+const inactiveClass = "text-gray-600";
+---
+
+<aside class="hidden lg:block">
+	<nav class="flex flex-col gap-2 pt-22 pb-8 h-full sticky top-0">
+		<a href="/" class="flex gap-4 px-4 items-center" class:list={[isActive("/") ? activeClass : inactiveClass]}><House size="20"/>Home</a>
+		<a href="/dishes" class="flex px-4 gap-4 items-center" class:list={[isActive("/dishes") ? activeClass : inactiveClass]}><Beef size="20"/>Platos</a>
+		<a href="/categories" class="flex px-4 gap-4 items-center" class:list={[isActive("/categories") ? activeClass : inactiveClass]}><ChartBarStacked size="20" />Categorías</a>
+		<a href="/allergens" class="flex px-4 gap-4 items-center" class:list={[isActive("/allergens") ? activeClass : inactiveClass]}><Wheat size="20"/>Alérgenos</a>
+
+		<SignOutButton class={"text-start cursor-pointer flex gap-4 px-4 items-center mt-auto"} class:list={[isActive("/") ? activeClass : inactiveClass]}><LogOut size={20}/>Desconectar</SignOutButton>
+	</nav>
+</aside>
