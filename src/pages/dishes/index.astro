@@ -1,9 +1,206 @@
 ---
+import Pagination from "@/components/Pagination.astro";
+import Table, { type Action, type TableHeaders } from "@/components/Table.astro";
 import Layout from "@/layouts/Layout.astro";
+import { getDishes } from "@/lib/getDishes";
+import { getTotalDishes } from "@/lib/getTotalDishes";
+import { Pen, Trash } from "@lucide/astro";
+
+const totalDishes = await getTotalDishes() as number;
+
+const page = Astro.url.searchParams.get('page') ?? '1';
+const perPage = Astro.url.searchParams.get('perPage') ?? '15';
+const totalPages = Math.floor(totalDishes / parseInt(perPage));
 
 
+const sortBy = Astro.url.searchParams.get('sortBy') || "name";
+const order = Astro.url.searchParams.get('order') || "asc";
+
+const dishes = await getDishes(parseInt(page), parseInt(perPage), sortBy, order);
+
+const tableHeader: TableHeaders[] = [
+    {
+      label: "Nombre",
+      key: ["name"],
+      value: (data) => data.name.es,
+      headerProps: {"data-header": "name", "data-sortable": "true", "data-sort": `${sortBy === "name" ? order : ""}`},
+      className: "cursor-pointer",
+    },
+    {
+      label: "Precio",
+      key: ["price"],
+      value: (data) => `${data.price.toFixed(2)}€`,
+      headerProps: {"data-header": "price", "data-sortable": "true", "data-sort": `${sortBy === "price" ? order : ""}`},
+      className: "cursor-pointer",
+    },
+    {
+      label: "Categorías",
+      description: "adasd",
+      key: ["categories"],
+      value: (data: Record<string, any>) => data.categories.join(", ") || "-",
+      headerProps: {"data-header": "categories", "data-sortable": "false", "data-sort": `${sortBy === "categories" ? order : ""}`},
+    },
+    {
+      label: "Alérgenos",
+      key: ["allergens"],
+      value: (data: Record<string, any>) => data.allergens.join(", ") || "-",
+      headerProps: {"data-header": "allergens", "data-sortable": "false", "data-sort": `${sortBy === "allergens" ? order : ""}`},
+    },
+];
+
+const actions: Action[] = [
+    {
+      label: "Editar",
+      icon: Pen,
+      iconProps: { size: 20, className: "text-gray-600" },
+      id: (data) => `edit-${data.id}`,
+      className: "text-gray-600 cursor-pointer text-[12px] flex flex-col justify-center items-center w-fit",
+    },
+    {
+      label: "Eliminar",
+      icon: Trash,
+      iconProps: { size: 20, className: "text-gray-600" },
+      id: (data) => `delete-${data.id}`,
+      className: "text-gray-600 cursor-pointer text-[12px] flex flex-col justify-center items-center w-fit",
+    },
+];
+
+const deleteDish = async (id: string) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(true);
+    }, 2000);
+  })
+}
 ---
 
 <Layout title="Dishes">
-    <h1>Dishes</h1>
+    <h1 class="text-2xl font-semibold text-balance mb-3">Platos</h1>
+    
+    <Table 
+        data={dishes} 
+        columns={tableHeader} 
+        caption={`Página ${page} de ${totalPages}, mostrando ${dishes.length} platos`} 
+        actions={actions} />
+
+    <Pagination 
+        page={parseInt(page)} 
+        perPage={parseInt(perPage)} 
+        totalPages={totalPages} />
 </Layout>
+
+<dialog id="delete-dish" class="modal">
+  <form method="dialog" class="flex flex-col gap-4 px-8 py-12 bg-white rounded-lg drop-shadow-xl">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">¿Estás seguro de que deseas eliminar este plato?</h3>
+    <div class="mt-2">
+      <p class="text-sm text-gray-500">
+        Esta acción no se puede deshacer.
+      </p>
+    </div>
+    
+    <span class="w-full [&[aria-hidden=true]]:hidden mx-auto text-center block" aria-hidden="true" data-slot="deleting-msg">Deleting...</span>
+
+    <div class="mt-4 w-full flex justify-end gap-4">
+      <button type="button" data-slot="delete-button" class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm [&[disabled=true]]:cursor-not-allowed [&[disabled=true]]:grayscale-75 [&[disabled=true]]:select-none">
+        Eliminar
+      </button>
+      <button type="button" data-slot="cancel-button" class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm [&[disabled=true]]:cursor-not-allowed [&[disabled=true]]:grayscale-75 [&[disabled=true]]:select-none">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<style>
+  dialog[open] {
+    /* @apply fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none */
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    outline: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  dialog::backdrop {
+    /* @apply fixed inset-0 z-40 bg-black/50 */
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+</style>
+
+<script>
+    const headers = document.querySelectorAll('[data-slot="table-head"][data-sortable=true]');
+    headers.forEach(header => {
+        header.addEventListener('click', function() {
+            const sort = header.getAttribute('data-sort') === 'asc' ? 'desc' : 'asc';
+            const url = new URL(window.location.href);
+            url.searchParams.set('sortBy', header.getAttribute('data-header') || '');
+            url.searchParams.set('order', sort);
+            window.location.href = url.toString();
+        })
+    })
+
+    const editButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="edit-"]');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const [_, id] = button.id.split('-');
+            window.location.href = `/dishes/${id}`;
+        })
+    })
+
+    const deleteButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="delete-"]');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const [_, id] = button.id.split('-');
+            const newEvent = new CustomEvent('delete-dish', {
+                detail: {
+                    id
+                }
+            });
+            document.dispatchEvent(newEvent);
+        })
+    })
+
+    const modal = document.querySelector('dialog[id="delete-dish"]');
+    document.addEventListener('delete-dish', function(e: CustomEvent) {
+        modal?.showModal();
+
+        const deleteButton = modal?.querySelector('button[data-slot="delete-button"]');
+        const cancelButton = modal?.querySelector('button[data-slot="cancel-button"]');
+        const deletingMsg = modal?.querySelector('span[data-slot="deleting-msg"]');
+
+
+        deleteButton?.setAttribute('data-id', e.detail.id);
+        deleteButton?.addEventListener('click', async function() {
+          const dishId = deleteButton.getAttribute('data-id');
+
+          // TODO: DELETE DISH - This is not waiting for the deletion to finish
+          async function deleteDish(id: string) {
+            return new Promise((resolve, reject) => {
+              deleteButton?.setAttribute('disabled', 'true');
+              cancelButton?.setAttribute('disabled', 'true');
+              deletingMsg?.setAttribute('aria-hidden', 'false');
+
+              setTimeout(() => {
+                resolve(true);
+              }, 5000);
+            })
+          }
+          dishId && await deleteDish(dishId);
+
+          modal?.close();
+          window.location.reload();
+        })
+
+        cancelButton?.addEventListener('click', function() {
+            modal?.close();
+        })
+    })
+</script>

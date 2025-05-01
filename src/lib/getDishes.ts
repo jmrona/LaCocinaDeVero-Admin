@@ -1,8 +1,12 @@
 import { supabase } from "./supabase";
 
-export const getDishes = async (page: number, perPage: number) => {
+export const getDishes = async (page: number, perPage: number, sortBy?: string, order?: string) => {
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
+    let sortByColumn = "name->>es"
+
+    if(sortBy !== undefined) sortByColumn = sortBy
+    if(sortBy === "name") sortByColumn = "name->>es"
 
     const { data, error } = await supabase
     .from('dishes')
@@ -18,7 +22,7 @@ export const getDishes = async (page: number, perPage: number) => {
         ),
         categories:dishes_categories( category_id ),
         allergens:dishes_allergens( allergen_id )
-      `).order("name->>es", {ascending: true}).range(from, to)
+    `).order(sortByColumn, {ascending: order === "asc"}).range(from, to)
 
     if (error) {
       console.error('Error fetching dishes:', error.message);
@@ -37,6 +41,11 @@ export const getDishes = async (page: number, perPage: number) => {
             categories,
             allergens
         }
+    }).sort((a, b) => {
+      if (!sortBy) return 0
+      
+      // return a[sortBy].localeCompare(b[sortBy])
+      return 0
     });
 
 }

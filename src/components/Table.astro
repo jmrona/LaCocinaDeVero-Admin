@@ -1,0 +1,97 @@
+---
+import {
+  Table as TableComponent,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { AArrowDown, AArrowUp } from "@lucide/astro";
+
+export interface Action {
+  label: string;
+  icon?: any | ((data: any) => any);
+  iconProps?: Record<string, any>;
+  id: string | ((data: any) => any);
+  className?: string;
+}
+
+export interface TableHeaders {
+  label: string;
+  key: string[];
+  description?: string;
+  value?: (data: any) => any;
+  className?: string;
+  headerProps?: Record<string, any>;
+}
+
+const { data, columns, caption, footer, headerContainerClass, rowClass, rowContainerClass, cellClass, actions} = Astro.props as {
+    data: any[];
+    dataColumns: string[];
+    columns: TableHeaders[];
+    caption?: string;
+    footer?: string;
+    headerContainerClass?: string;
+    rowClass?: string;
+    rowContainerClass?: string;
+    cellClass?: string;
+    actions?: Action[];
+};
+
+---
+
+<TableComponent>
+  <TableHeader class:list={headerContainerClass ?? ""}>
+    <TableRow>
+      {columns.map((column) => {
+        const OrderIcon = 
+          column.headerProps?.["data-sort"] === "asc" 
+          ? AArrowDown 
+          : column.headerProps?.["data-sort"] === "desc" 
+            ? AArrowUp 
+            : undefined;
+
+        return (
+          <TableHead className={`${column.className ?? ""}`} {...(column.headerProps ?? {})}>
+            <span class="flex gap-2">
+              {column.label} {column.headerProps?.["data-sortable"] === "true" && OrderIcon && <OrderIcon size={20} />}
+            </span>
+          </TableHead>
+        )
+      })}
+      {actions && <TableHead colSpan={actions.length}>Acciones</TableHead>}
+    </TableRow>
+  </TableHeader>
+  <TableBody class:list={rowContainerClass ?? ""}>
+    {data.map((row) => (
+      <TableRow class:list={[rowClass ?? ""]}>
+        {columns.map((column) => {
+            const key = column.key.join("-")
+            const value = column.value ? column.value(row) : row[key]
+
+            return (
+                <TableCell class:list={[cellClass ?? ""]}>{value ?? "-"}</TableCell>
+            )
+        })}
+
+        {actions && actions.map((action) => {
+          const Icon = action.icon;
+          const id = typeof action.id === "function" ? action.id(row) : action.id;
+
+          return (
+            <TableCell className={`inline-block w-fit" ${cellClass ?? ""}`}>
+                <button class:list={[action.className ?? ""]} id={id}>
+                    {Icon && <Icon {...action.iconProps} />}
+                    {action.label}
+                </button>
+            </TableCell>
+        )})}
+      </TableRow>
+    ))}
+  </TableBody>
+  <TableCaption>{caption}</TableCaption>
+  {footer && <TableFooter>{footer}</TableFooter>}
+</TableComponent>

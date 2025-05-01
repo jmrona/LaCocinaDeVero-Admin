@@ -1,0 +1,34 @@
+---
+import { cn } from "@/lib/utils";
+
+const { page = 1, perPage = 10, totalPages = 10, className, ...rest} = Astro.props;
+
+const isFirstPageDisabled = page === 1;
+const isLastPageDisabled = page === totalPages;
+const queryParams = Astro.url.searchParams ?? new URLSearchParams();
+queryParams.delete('page')
+queryParams.delete('perPage')
+---
+
+<nav class={cn("flex justify-center gap-2", className)} {...rest}> 
+    <a href={`/dishes${queryParams ? `?${queryParams.toString()}&` : "?"}page=${page - 1}&perPage=${perPage}`} 
+        class:list={[isFirstPageDisabled ? "text-gray-400 cursor-not-allowed" : "text-gray-600", "aria-disabled:pointer-events-none"]} 
+        aria-disabled={isFirstPageDisabled}>
+        Anterior
+    </a>
+    {[...Array(totalPages).keys()].map(i => {
+        const currentPage = i + 1;
+        return (
+            <a href={`/dishes${queryParams ? `?${queryParams.toString()}&` : "?"}page=${currentPage}&perPage=${perPage}`} 
+                class:list={[currentPage === page ? "text-primary" : "text-gray-600", "aria-disabled:pointer-events-none"]} 
+                aria-disabled={currentPage === page}>
+                {currentPage}
+            </a>
+        )
+    })}
+    <a href={`/dishes${queryParams ?  `?${queryParams.toString()}&` : "?"}page=${page + 1}&perPage=${perPage}`} 
+        class:list={[isLastPageDisabled ? "text-gray-400 cursor-not-allowed" : "text-gray-600", "aria-disabled:pointer-events-none"]} 
+        aria-disabled={isLastPageDisabled}>
+        Siguiente
+    </a>
+</nav>
