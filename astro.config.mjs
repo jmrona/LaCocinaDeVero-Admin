@@ -14,6 +14,6 @@ export default defineConfig({
     plugins: [tailwindcss()]
   },
   integrations: [cleck(), react()],
-  output: "server",
+  output: "static",
   adapter: vercel()
 });
