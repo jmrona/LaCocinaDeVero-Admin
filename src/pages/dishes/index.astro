@@ -9,7 +9,7 @@ import { Pen, Trash } from "@lucide/astro";
 const totalDishes = await getTotalDishes() as number;
 
 const page = Astro.url.searchParams.get('page') ?? '1';
-const perPage = Astro.url.searchParams.get('perPage') ?? '15';
+const perPage = Astro.url.searchParams.get('perPage') ?? '10';
 const totalPages = Math.floor(totalDishes / parseInt(perPage));
 
 
@@ -86,7 +86,8 @@ const deleteDish = async (id: string) => {
     <Pagination 
         page={parseInt(page)} 
         perPage={parseInt(perPage)} 
-        totalPages={totalPages} />
+        totalPages={totalPages}
+        className="mt-3" />
 </Layout>
 
 <dialog id="delete-dish" class="modal">
