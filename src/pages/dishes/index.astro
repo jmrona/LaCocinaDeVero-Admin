@@ -113,7 +113,6 @@ const deleteDish = async (id: string) => {
 
 <style>
   dialog[open] {
-    /* @apply fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none */
     position: fixed;
     inset: 0;
     margin: auto;
@@ -124,6 +123,22 @@ const deleteDish = async (id: string) => {
     overflow: hidden;
     outline: 0;
     -webkit-overflow-scrolling: touch;
+    transition: all 0.1s linear;
+    border-radius: 16px;
+
+    @starting-style {
+      scale: 0.5;
+      opacity: 0;
+    }
+
+    &::backdrop {
+      opacity: 1;
+      transition: all 0.1s linear;
+
+      @starting-style {
+        opacity: 0;
+      }
+    }
   }
 
   dialog::backdrop {
