@@ -4,8 +4,9 @@ import Table, { type Action, type TableHeaders } from "@/components/Table.astro"
 import Layout from "@/layouts/Layout.astro";
 import { getDishes } from "@/lib/getDishes";
 import { getTotalDishes } from "@/lib/getTotalDishes";
-import { Pen, Trash } from "@lucide/astro";
+import { Pen, Trash, Plus } from "@lucide/astro";
 
+export const prerender = false;
 const totalDishes = await getTotalDishes() as number;
 
 const page = Astro.url.searchParams.get('page') ?? '1';
@@ -64,18 +65,17 @@ const actions: Action[] = [
       className: "text-gray-600 cursor-pointer text-[12px] flex flex-col justify-center items-center w-fit",
     },
 ];
-
-const deleteDish = async (id: string) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(true);
-    }, 2000);
-  })
-}
 ---
 
 <Layout title="Dishes">
-    <h1 class="text-2xl font-semibold text-balance mb-3">Platos</h1>
+    <div class="flex justify-between">
+      <h1 class="text-2xl font-semibold text-balance mb-3">Platos</h1>
+      <div class="w-fit">
+        <a href="/dishes/new" class="bg-primary text-white rounded-md px-4 py-2 text-sm font-medium flex gap-2" data-slot="new-dish-btn">
+          <Plus size={20}/> Añadir nuevo plato
+        </a>
+      </div>
+    </div>
     
     <Table 
         data={dishes} 
@@ -184,7 +184,7 @@ const deleteDish = async (id: string) => {
         })
     })
 
-    const modal = document.querySelector('dialog[id="delete-dish"]');
+    const modal = document.querySelector('dialog[id="delete-dish"]') as HTMLDialogElement;
     document.addEventListener('delete-dish', function(e: CustomEvent) {
         modal?.showModal();
 
@@ -197,18 +197,24 @@ const deleteDish = async (id: string) => {
         deleteButton?.addEventListener('click', async function() {
           const dishId = deleteButton.getAttribute('data-id');
 
-          // TODO: DELETE DISH - This is not waiting for the deletion to finish
-          async function deleteDish(id: string) {
-            return new Promise((resolve, reject) => {
+          async function deleteDish(dishId: string) {
+
               deleteButton?.setAttribute('disabled', 'true');
               cancelButton?.setAttribute('disabled', 'true');
               deletingMsg?.setAttribute('aria-hidden', 'false');
 
-              setTimeout(() => {
-                resolve(true);
-              }, 5000);
-            })
+              const response = await fetch(`/api/delete-dish`, {
+                method: "DELETE",
+                body: JSON.stringify({
+                  dishId
+                }),
+                
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
           }
+
           dishId && await deleteDish(dishId);
 
           modal?.close();

@@ -1,0 +1,187 @@
+---
+import GermanFlag from "@/components/icons/german.astro";
+import SpainFlag from "@/components/icons/spain.astro";
+import UkFlat from "@/components/icons/uk.astro";
+import Modal from "@/components/Modal.astro";
+import Layout from "@/layouts/Layout.astro";
+import {Save} from "@lucide/astro";
+
+const { dishId } = Astro.params as { dishId: string };
+
+export const prerender = false;
+---
+
+<Layout title="Dishes">
+  <h1 class="text-2xl font-semibold text-balance mb-3">Actualizar plato</h1>
+  <form id="update-dish-form" method="post" class="flex flex-row md:flex-col gap-4" enctype="multipart/form-data">
+    <div class="flex-1/2 flex flex-col gap-4">
+      <label for="name" class="flex flex-col gap-1">
+        Nombre del plato 
+        <div class="relative">
+          <input type="text" name="name-es" id="name-es" class="input w-full pe-10" placeholder="Nombre del plato en español" required>
+          <SpainFlag width={20} height={20} class="absolute top-1/2 right-4 transform -translate-y-1/2" />
+        </div>
+        <div class="relative">
+          <input type="text" name="name-en" id="name-en" class="input w-full pe-10" placeholder="Nombre del plato en inglés" required>
+          <UkFlat width={20} height={20} class="absolute top-1/2 right-4 transform -translate-y-1/2" />
+        </div>
+        <div class="relative">
+          <input type="text" name="name-de" id="name-de" class="input w-full pe-10" placeholder="Nombre del plato en alemán" required>
+          <GermanFlag width={20} height={20} class="absolute top-1/2 right-4 transform -translate-y-1/2" />
+        </div>
+      </label>
+      
+      <label for="price" class="flex flex-col gap-1">
+        Precio
+        <input type="number" name="price" id="price" class="input" placeholder="Precio" step="any" required>
+      </label>
+      
+      <label for="categories" class="flex flex-col gap-1 relative">
+        <span id="categories-label">
+          Categorías
+        </span>
+        
+        <div class="bg-slate-300 grid grid-cols-3 rounded-sm w-full" aria-hidden="false">
+          {[{id:1, name: "option1"}, {id:2, name: "option2"}, {id:3, name: "option3"}].map((option) => (
+          <label class="badge badge-primary p-2"> 
+            <span class="bg-slate-500 px-2 py-1 flex rounded-sm text-white items-center justify-between">
+              {option.name} 
+              <input type="checkbox" name="categories" value={option.id} class="accent-primary">
+            </span>
+          </label>
+          ))}
+        </div>
+      </label>
+      
+      <label for="allergens" class="flex flex-col gap-1">
+        <span id="allergens-label">
+          Alérgenos
+        </span>
+        
+        <div class="bg-slate-300 grid grid-cols-3 rounded-sm w-full" aria-hidden="false">
+          {[{id:1, name: "option1"}, {id:2, name: "option2"}, {id:3, name: "option3"}].map((option) => (
+          <label class="badge badge-primary p-2"> 
+            <span class="bg-slate-500 px-2 py-1 flex rounded-sm text-white items-center justify-between">
+              {option.name} 
+              <input type="checkbox" name="allergens" value={option.id} class="accent-primary">
+            </span>
+          </label>
+          ))}
+        </div>
+      </label>
+    </div>
+    <div class="flex-1/2 flex flex-col gap-4">
+      imagen
+    </div>
+    
+  </form>
+  <button type="submit" form="update-dish-form" class="btn mt-4"> 
+    <Save size={20}/> Actualizar
+  </button>
+</Layout>   
+
+<Modal id="error-dialog" class="min-w-xl px-10 py-12 flex flex-col">
+  <h3 class="text-[20px] font-medium leading-6 text-gray-900">
+    Error
+  </h3>
+  <div class="error-msg grow mt-2 text-sm text-red-600"></div>
+  <button type="button" data-slot="close-button" class="mt-10 inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm [&[disabled=true]]:cursor-not-allowed [&[disabled=true]]:grayscale-75 [&[disabled=true]]:select-none">
+    Cerrar  
+  </button>
+</Modal>
+
+<script define:vars={{ dishId }}>
+  document.addEventListener("DOMContentLoaded", async function(e) {
+    const response = await fetch(`/api/get-dish?dishId=${dishId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    
+    const json = await response.json();
+    const dish = json.dish;
+    
+    const form = document.querySelector("#update-dish-form");
+    const dialog = document.querySelector("#error-dialog");
+    const errorMsg = dialog.querySelector(".error-msg");
+    const closeBtn = document.querySelector("#error-dialog [data-slot='close-button']");
+
+    closeBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dialog.close();
+    })
+
+    const nameInputs = form.querySelectorAll("input[name^='name-']");
+    nameInputs.forEach(input => {
+      if(input.name.includes("es")) {
+        input.value = dish.name.es;
+      }
+      
+      if(input.name.includes("en")) {
+        input.value = dish.name.en;
+      }
+      
+      if(input.name.includes("de")) {
+        input.value = dish.name.de;
+      }
+    })
+    
+    const priceInput = form.querySelector("input[name='price']");
+    priceInput.value = dish.price.toString();
+    
+    const categoriesInputs = form.querySelectorAll("input[name='categories']");
+    const categoriesIds = dish.categories.map(category => category.category_id);
+    categoriesInputs.forEach(input => {
+      input.checked = categoriesIds.includes(parseInt(input.value, 10));
+    })
+    
+    const allergensInputs = form.querySelectorAll("input[name='allergens']");
+    const allergensIds = dish.allergens.map(allergen => allergen.allergen_id);
+    allergensInputs.forEach(input => {
+      input.checked = allergensIds.includes(parseInt(input.value, 10));
+    })
+
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const data = new FormData(form);
+  
+      const name = {
+        es: data.get("name-es")?.toString()?.trim(),
+        en: data.get("name-en")?.toString()?.trim(),
+        de: data.get("name-de")?.toString()?.trim(),
+      }
+      const price = parseFloat(data.get("price")?.toString() ?? "");
+      const categories = [...new Set(Array.from(data.getAll("categories")).map(category => category))]; 
+      const allergens = [...new Set(Array.from(data.getAll("allergens")).map(allergen => allergen))];
+
+      const response = await fetch(`/api/update-dish`, {
+        method: "PUT",
+        body: JSON.stringify({
+          dishId,
+          name,
+          price,
+          categories,
+          allergens
+        }),
+        
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+
+        errorMsg.innerText = error.message;
+        dialog.showModal();
+        return;
+      }
+
+      window.location.href = "/dishes";
+    })
+  })
+</script>
