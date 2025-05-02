@@ -1,0 +1,42 @@
+---
+const {id, ...rest} = Astro.props
+---
+<style>
+    dialog[open] {
+      margin: auto;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      outline: 0;
+      -webkit-overflow-scrolling: touch;
+      transition: all 0.1s linear;
+      border-radius: 16px;
+  
+      @starting-style {
+        scale: 0.5;
+        opacity: 0;
+      }
+  
+      &::backdrop {
+        opacity: 1;
+        transition: all 0.1s linear;
+  
+        @starting-style {
+          opacity: 0;
+        }
+      }
+    }
+  
+    dialog::backdrop {
+      z-index: 40;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+  </style>
+
+<dialog id={id} class="modal">
+    <div {...rest}>
+        <slot />
+    </div>
+</dialog>
