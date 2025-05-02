@@ -15,6 +15,14 @@ body {
   font-family: var(--font-display);
 }
 
+@utility btn {
+  @apply bg-primary text-white rounded-md px-4 py-2 text-sm font-medium flex gap-2 w-fit cursor-pointer
+}
+
+@utility input {
+  @apply bg-slate-300 text-black px-2 py-3 rounded-sm;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
