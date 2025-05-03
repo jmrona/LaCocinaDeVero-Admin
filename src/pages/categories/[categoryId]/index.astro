@@ -1,0 +1,7 @@
+---
+const { categoryId } = Astro.params as { categoryId: string };
+export const prerender = false;
+
+---
+
+<h1>Category: {categoryId}</h1>

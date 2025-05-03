@@ -3,6 +3,7 @@ import Menu from "@/components/Menu.astro";
 import MenuMobile from "@/components/MenuMobile.astro";
 import "@/styles/global.css";
 import UserButton from "node_modules/@clerk/astro/components/interactive/UserButton/UserButton.astro";
+const {title} = Astro.props as {title: string};
 ---
 
 <!doctype html>
@@ -12,7 +13,7 @@ import UserButton from "node_modules/@clerk/astro/components/interactive/UserBut
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>{title}</title>
 	</head>
 	<body>
 		<main class="grid grid-cols-1 lg:grid-cols-[200px_1fr] h-screen">
