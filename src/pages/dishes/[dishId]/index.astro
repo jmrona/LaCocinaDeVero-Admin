@@ -4,6 +4,7 @@ import SpainFlag from "@/components/icons/spain.astro";
 import UkFlat from "@/components/icons/uk.astro";
 import Modal from "@/components/Modal.astro";
 import Layout from "@/layouts/Layout.astro";
+import { readFileAsBase64 } from "@/lib/readFileAsBase64";
 import {Save} from "@lucide/astro";
 
 const { dishId } = Astro.params as { dishId: string };
@@ -13,7 +14,7 @@ export const prerender = false;
 
 <Layout title="Dishes">
   <h1 class="text-2xl font-semibold text-balance mb-3">Actualizar plato</h1>
-  <form id="update-dish-form" method="post" class="flex flex-row md:flex-col gap-4" enctype="multipart/form-data">
+  <form id="update-dish-form" method="post" class="flex flex-col md:flex-row gap-4" enctype="multipart/form-data">
     <div class="flex-1/2 flex flex-col gap-4">
       <label for="name" class="flex flex-col gap-1">
         Nombre del plato 
@@ -71,7 +72,13 @@ export const prerender = false;
       </label>
     </div>
     <div class="flex-1/2 flex flex-col gap-4">
-      imagen
+      <label for="upload-image-input" class="flex flex-col text-center gap-1">
+        Foto del plato
+        <div id="image-preview" class="relative max-w-md mx-auto cursor-pointer">
+          <img src="/img/placeholder-image.webp" alt="Imagen" class="w-full h-full object-cover max-w-md">
+        </div>
+        <input type="file" id="upload-image-input" name="image" id="image" class="hidden" accept="image/*">
+      </label>
     </div>
     
   </form>
@@ -101,11 +108,13 @@ export const prerender = false;
     
     const json = await response.json();
     const dish = json.dish;
+    console.log('dish: ', dish);
     
     const form = document.querySelector("#update-dish-form");
     const dialog = document.querySelector("#error-dialog");
     const errorMsg = dialog.querySelector(".error-msg");
     const closeBtn = document.querySelector("#error-dialog [data-slot='close-button']");
+    const imagePreview = document.querySelector("#image-preview img");
 
     closeBtn.addEventListener("click", function(e) {
       e.preventDefault();
@@ -143,6 +152,10 @@ export const prerender = false;
       input.checked = allergensIds.includes(parseInt(input.value, 10));
     })
 
+    if(dish.image) {
+      const image = document.querySelector("#image-preview img");
+      image.src = dish.image;
+    }
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -157,6 +170,7 @@ export const prerender = false;
       const price = parseFloat(data.get("price")?.toString() ?? "");
       const categories = [...new Set(Array.from(data.getAll("categories")).map(category => category))]; 
       const allergens = [...new Set(Array.from(data.getAll("allergens")).map(allergen => allergen))];
+      const image = imagePreview?.src ?? "/img/placeholder-image.webp";
 
       const response = await fetch(`/api/update-dish`, {
         method: "PUT",
@@ -165,7 +179,8 @@ export const prerender = false;
           name,
           price,
           categories,
-          allergens
+          allergens,
+          image
         }),
         
         headers: {
@@ -182,6 +197,27 @@ export const prerender = false;
       }
 
       window.location.href = "/dishes";
+    })
+  })
+</script>
+
+<script type="module">
+  import {readFileAsBase64} from "/src/lib/readFileAsBase64";
+
+  document.addEventListener("DOMContentLoaded", async function(e) {
+    const imagePreview = document.querySelector("#image-preview");
+    const imageInput = document.querySelector("#upload-image-input");
+  
+    imageInput.addEventListener("change", async function(e) {
+      const file = e.target.files[0];
+      console.log('file: ', file);
+
+      if (!file) return;
+      const base64 = await readFileAsBase64(file, true);
+      const image = imagePreview.querySelector("img");
+      image.src = base64;
+
+
     })
   })
 </script>

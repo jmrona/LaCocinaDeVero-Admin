@@ -10,6 +10,7 @@ interface Dish {
         de: string;
     };
     price: number;
+    image: string;
     categories: number[];
     allergens: number[];
 }
@@ -17,7 +18,7 @@ interface Dish {
 export const PUT: APIRoute = async ({ request }) => {
     const data: Dish = await request.json();
     
-    const { dishId, name, price, categories, allergens } = data;
+    const { dishId, name, price, categories, allergens, image } = data;
 
     if(name.es === "" || name.en === "" || name.de === "") {
       return new Response(
@@ -37,21 +38,21 @@ export const PUT: APIRoute = async ({ request }) => {
       );
     }
 
-    if(categories.length === 0) {
-      return new Response(
-        JSON.stringify({
-          message: "Debes elegir al menos una categoría",
-        }),
-        { status: 400 }
-      );
-    }
+    // if(categories.length === 0) {
+    //   return new Response(
+    //     JSON.stringify({
+    //       message: "Debes elegir al menos una categoría",
+    //     }),
+    //     { status: 400 }
+    //   );
+    // }
 
     const { data: newDish, error } = await supabase
       .from('dishes')
       .update({
         name,
         price,
-        image: "/img/placeholder-image.webp",
+        image: image ?? "/img/placeholder-image.webp",
       })
         .match({ dish_id: dishId })
         .single();
@@ -66,35 +67,35 @@ export const PUT: APIRoute = async ({ request }) => {
         );
     }
 
-    const categoryLinks = categories.map(categoryId => ({
-      dish_id: dishId,
-      category_id: categoryId,
-    }));
+    // const categoryLinks = categories.map(categoryId => ({
+    //   dish_id: dishId,
+    //   category_id: categoryId,
+    // }));
 
-    const { error: deleteCategoryError } = await supabase
-      .from('dishes_categories')
-      .delete()
-      .eq("dish_id", dishId);
+    // const { error: deleteCategoryError } = await supabase
+    //   .from('dishes_categories')
+    //   .delete()
+    //   .eq("dish_id", dishId);
 
-    const { error: categoryError } = await supabase
-      .from('dishes_categories')
-      .insert(categoryLinks);
+    // const { error: categoryError } = await supabase
+    //   .from('dishes_categories')
+    //   .insert(categoryLinks);
 
-    if (allergens && allergens.length > 0) {
-        const { error: deleteAllergenError } = await supabase
-          .from('dishes_allergens')
-          .delete()
-          .eq("dish_id", dishId);
+    // if (allergens && allergens.length > 0) {
+    //     const { error: deleteAllergenError } = await supabase
+    //       .from('dishes_allergens')
+    //       .delete()
+    //       .eq("dish_id", dishId);
           
-        const allergenLinks = allergens.map(allergenId => ({
-          dish_id: dishId,
-          allergen_id: allergenId,
-        }));
+    //     const allergenLinks = allergens.map(allergenId => ({
+    //       dish_id: dishId,
+    //       allergen_id: allergenId,
+    //     }));
 
-        const { error: allergenError } = await supabase
-            .from('dishes_allergens')
-            .insert(allergenLinks);
-    }
+    //     const { error: allergenError } = await supabase
+    //         .from('dishes_allergens')
+    //         .insert(allergenLinks);
+    // }
 
     return new Response(
       JSON.stringify({
