@@ -1,8 +1,205 @@
 ---
+import Table, { type Action, type TableHeaders } from "@/components/Table.astro";
 import Layout from "@/layouts/Layout.astro";
-const auth = Astro.locals.auth();
+import Pagination from "@/components/Pagination.astro";
+import { Pen, Trash, Plus } from "@lucide/astro";
 
+import {getTotalCategories} from "@/lib/getTotalCategories";
+import {getCategories} from "@/lib/getCategories";
+import Modal from "@/components/Modal.astro";
+
+export const prerender = false;
+let totalCategories = await getTotalCategories() as number;
+
+const page = Astro.url.searchParams.get('page') ?? '1';
+const perPage = Astro.url.searchParams.get('perPage') ?? '10';
+let totalPages = Math.round(totalCategories / parseInt(perPage));
+
+const sortBy = Astro.url.searchParams.get('sortBy') || "name";
+const order = Astro.url.searchParams.get('order') || "asc";
+const search = Astro.url.searchParams.get('search') || undefined;
+
+let categories = await getCategories(parseInt(page), parseInt(perPage), sortBy, order, search);
+
+if(search) {
+  categories = categories.filter(cat => cat.name.es.toLowerCase().includes(search.toLowerCase()));
+  totalPages = Math.floor(categories.length / parseInt(perPage));
+  totalCategories = categories.length;
+}
+
+const tableHeader: TableHeaders[] = [
+{
+  label: "Nombre",
+  key: ["name"],
+  value: (data) => data.name.es,
+  headerProps: {"data-header": "name", "data-sortable": `false`, "data-sort": `${sortBy === "name" ? order : ""}`},
+  className: "cursor-pointer",
+},
+];
+
+const actions: Action[] = [
+{
+  label: "Editar",
+  icon: Pen,
+  iconProps: { size: 20, className: "text-gray-600" },
+  id: (data) => `edit-${data.category_id}`,
+  className: "text-gray-600 cursor-pointer text-[12px] flex flex-col justify-center items-center w-fit",
+},
+{
+  label: "Eliminar",
+  icon: Trash,
+  iconProps: { size: 20, className: "text-gray-600" },
+  id: (data) => `delete-${data.category_id}`,
+  className: "text-gray-600 cursor-pointer text-[12px] flex flex-col justify-center items-center w-fit",
+},
+];
 ---
-<Layout>
-    <h1>categories</h1>
+
+<Layout title="Categorías">
+  <div class="flex justify-between">
+    <h1 class="text-2xl font-semibold text-balance mb-3">Categorías</h1>
+    <div class="w-fit">
+      <a href="/category/new" class="bg-primary text-white rounded-md px-4 py-2 text-sm font-medium flex gap-2" data-slot="new-category-btn">
+        <Plus size={20}/> Añadir nueva categoría
+      </a>
+    </div>
+  </div>
+  <input type="search" id="search-category" name="search" placeholder="Buscar..." class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" />
+  
+  <Table 
+  data={categories} 
+  columns={tableHeader} 
+  caption={`Página ${page} de ${totalPages}, mostrando ${categories.length} categorias`} 
+  actions={actions} />
+  
+  {totalPages > 1 && 
+    <Pagination 
+    path="/categories"
+    page={parseInt(page)} 
+    perPage={parseInt(perPage)} 
+    totalPages={totalPages}
+    className="mt-3" />
+  }
 </Layout>
+
+<Modal id="delete-category">
+  <form method="dialog" class="flex flex-col gap-4 px-8 py-12 bg-white rounded-lg drop-shadow-xl">
+    <h3 class="text-lg font-medium leading-6 text-gray-900">¿Estás seguro de que deseas eliminar esta categoría?</h3>
+    <div class="mt-2">
+      <p class="text-sm text-gray-500">
+        Esta acción no se puede deshacer.
+      </p>
+    </div>
+    
+    <span class="w-full [&[aria-hidden=true]]:hidden mx-auto text-center block" aria-hidden="true" data-slot="deleting-msg">Deleting...</span>
+    
+    <div class="mt-4 w-full flex justify-end gap-4">
+      <button type="button" data-slot="delete-button" class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm [&[disabled=true]]:cursor-not-allowed [&[disabled=true]]:grayscale-75 [&[disabled=true]]:select-none">
+        Eliminar
+      </button>
+      <button type="button" data-slot="cancel-button" class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm [&[disabled=true]]:cursor-not-allowed [&[disabled=true]]:grayscale-75 [&[disabled=true]]:select-none">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</Modal>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const url = new URL(window.location.href);
+    const search = url.searchParams.get('search');
+    
+    const searchCategory = document.querySelector('#search-category') as HTMLInputElement;
+    if(search) {
+      searchCategory.value = search;
+      searchCategory.focus();
+    } else {
+      url.searchParams.delete('search');
+    }
+    
+    searchCategory?.addEventListener('change', function() {
+      const searchValue = searchCategory.value;
+      
+      if(searchValue === '') url.searchParams.delete('search');
+      else url.searchParams.set('search', searchValue);
+      
+      window.location.href = url.toString();
+    })
+    
+    // const headers = document.querySelectorAll('[data-slot="table-head"][data-sortable=true]');
+    // headers.forEach(header => {
+    //   header.addEventListener('click', function() {
+    //     const sort = header.getAttribute('data-sort') === 'asc' ? 'desc' : 'asc';
+    //     const url = new URL(window.location.href);
+    //     url.searchParams.set('sortBy', header.getAttribute('data-header') || '');
+    //     url.searchParams.set('order', sort);
+    //     window.location.href = url.toString();
+    //   })
+    // })
+    
+    const editButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="edit-"]');
+    editButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const [_, id] = button.id.split('-');
+        console.log('button.id.: ', id);
+        window.location.href = `/categories/${id}`;
+      })
+    })
+    
+    const deleteButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="delete-"]');
+    deleteButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const [_, id] = button.id.split('-');
+        const newEvent = new CustomEvent('delete-category', {
+          detail: {
+            id
+          }
+        });
+        document.dispatchEvent(newEvent);
+      })
+    })
+    
+    const modal = document.querySelector('dialog[id="delete-category"]') as HTMLDialogElement;
+    document.addEventListener('delete-category', function(e: CustomEvent) {
+      modal?.showModal();
+      
+      const deleteButton = modal?.querySelector('button[data-slot="delete-button"]');
+      const cancelButton = modal?.querySelector('button[data-slot="cancel-button"]');
+      const deletingMsg = modal?.querySelector('span[data-slot="deleting-msg"]');
+      
+      
+      deleteButton?.setAttribute('data-id', e.detail.id);
+      deleteButton?.addEventListener('click', async function() {
+        const categoryId = deleteButton.getAttribute('data-id');
+        
+        async function deleteDish(categoryId: string) {
+          
+          deleteButton?.setAttribute('disabled', 'true');
+          cancelButton?.setAttribute('disabled', 'true');
+          deletingMsg?.setAttribute('aria-hidden', 'false');
+          
+          const response = await fetch(`/api/delete-category`, {
+            method: "DELETE",
+            body: JSON.stringify({
+              categoryId
+            }),
+            
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+        }
+        
+        categoryId && await deleteDish(categoryId);
+        
+        modal?.close();
+        window.location.reload();
+      })
+      
+      cancelButton?.addEventListener('click', function() {
+        modal?.close();
+      })
+    })
+  })
+</script>
