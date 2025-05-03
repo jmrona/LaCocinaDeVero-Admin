@@ -168,7 +168,7 @@ import {Save} from "@lucide/astro";
 </script>
 
 <script type="module">
-  import {readFileAsBase64} from "../../../lib/readFileAsBase64"
+  import {readFileAsBase64} from "../../../lib/readFileAsBase64.ts"
 
   document.addEventListener("DOMContentLoaded", async function(e) {
     const imagePreview = document.querySelector("#image-preview");
@@ -176,14 +176,11 @@ import {Save} from "@lucide/astro";
   
     imageInput.addEventListener("change", async function(e) {
       const file = e.target.files[0];
-      console.log('file: ', file);
 
       if (!file) return;
       const base64 = await readFileAsBase64(file, true);
       const image = imagePreview.querySelector("img");
       image.src = base64;
-
-
     })
   })
 </script>
