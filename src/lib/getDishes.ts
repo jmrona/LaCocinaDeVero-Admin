@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-export const getDishes = async (page: number, perPage: number, sortBy?: string, order?: string, search?: string) => {
+export const getDishes = async (page: number, perPage: number, sortBy?: string, order?: string, search?: string, cat?: string[]) => {
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
     let sortByColumn = "name->>es"
@@ -21,13 +21,14 @@ export const getDishes = async (page: number, perPage: number, sortBy?: string, 
           )
         ),
         categories:dishes_categories( category_id ),
-        categoriesV2:dishes_categories( category_id!inner(name, category_id) ),
         allergens:dishes_allergens( allergen_id )
     `)
 
     if(search) query.ilike(`name->>es`, `%${search}%`)
+    if(cat) query.in('dishes_categories.category_id', cat); 
     
     query.order(sortByColumn, {ascending: order === "asc"}).range(from, to)
+
 
     const { data, error } = await query;
     
