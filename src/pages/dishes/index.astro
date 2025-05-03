@@ -7,31 +7,38 @@ import { getTotalDishes } from "@/lib/getTotalDishes";
 import { Pen, Trash, Plus } from "@lucide/astro";
 
 export const prerender = false;
-const totalDishes = await getTotalDishes() as number;
+let totalDishes = await getTotalDishes() as number;
 
 const page = Astro.url.searchParams.get('page') ?? '1';
 const perPage = Astro.url.searchParams.get('perPage') ?? '10';
-const totalPages = Math.floor(totalDishes / parseInt(perPage));
+let totalPages = Math.floor(totalDishes / parseInt(perPage));
 
 
 const sortBy = Astro.url.searchParams.get('sortBy') || "name";
 const order = Astro.url.searchParams.get('order') || "asc";
+const search = Astro.url.searchParams.get('search') || undefined;
 
-const dishes = await getDishes(parseInt(page), parseInt(perPage), sortBy, order);
+let dishes = await getDishes(parseInt(page), parseInt(perPage), sortBy, order, search);
+
+if(search) {
+  dishes = dishes.filter(dish => dish.name.es.toLowerCase().includes(search.toLowerCase()));
+  totalPages = Math.floor(dishes.length / parseInt(perPage));
+  totalDishes = dishes.length;
+}
 
 const tableHeader: TableHeaders[] = [
     {
       label: "Nombre",
       key: ["name"],
       value: (data) => data.name.es,
-      headerProps: {"data-header": "name", "data-sortable": "true", "data-sort": `${sortBy === "name" ? order : ""}`},
+      headerProps: {"data-header": "name", "data-sortable": `${search ? "false" : "true"}`, "data-sort": `${sortBy === "name" ? order : ""}`},
       className: "cursor-pointer",
     },
     {
       label: "Precio",
       key: ["price"],
       value: (data) => `${data.price.toFixed(2)}€`,
-      headerProps: {"data-header": "price", "data-sortable": "true", "data-sort": `${sortBy === "price" ? order : ""}`},
+      headerProps: {"data-header": "price", "data-sortable": `${search ? "false" : "true"}`, "data-sort": `${sortBy === "price" ? order : ""}`},
       className: "cursor-pointer",
     },
     {
@@ -76,6 +83,7 @@ const actions: Action[] = [
         </a>
       </div>
     </div>
+    <input type="search" id="search-dish" name="search" placeholder="Buscar..." class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" />
     
     <Table 
         data={dishes} 
@@ -83,11 +91,11 @@ const actions: Action[] = [
         caption={`Página ${page} de ${totalPages}, mostrando ${dishes.length} platos`} 
         actions={actions} />
 
-    <Pagination 
+    {totalPages > 1 && <Pagination 
         page={parseInt(page)} 
         perPage={parseInt(perPage)} 
         totalPages={totalPages}
-        className="mt-3" />
+        className="mt-3" />}
 </Layout>
 
 <dialog id="delete-dish" class="modal">
@@ -152,77 +160,105 @@ const actions: Action[] = [
 </style>
 
 <script>
-    const headers = document.querySelectorAll('[data-slot="table-head"][data-sortable=true]');
-    headers.forEach(header => {
-        header.addEventListener('click', function() {
-            const sort = header.getAttribute('data-sort') === 'asc' ? 'desc' : 'asc';
-            const url = new URL(window.location.href);
-            url.searchParams.set('sortBy', header.getAttribute('data-header') || '');
-            url.searchParams.set('order', sort);
-            window.location.href = url.toString();
-        })
-    })
+    document.addEventListener('DOMContentLoaded', function() {
+      const url = new URL(window.location.href);
+      const search = url.searchParams.get('search');
 
-    const editButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="edit-"]');
-    editButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          const [_, id] = button.id.split('-');
-            window.location.href = `/dishes/${id}`;
-        })
-    })
+      const searchDish = document.querySelector('#search-dish');
+      if(search) {
+        searchDish.value = search;
+        searchDish.focus();
+      } else {
+        url.searchParams.delete('search');
+      }
 
-    const deleteButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="delete-"]');
-    deleteButtons.forEach(button => {
-        button.addEventListener('click', function() {
+      let timeout: any;
+      searchDish?.addEventListener('change', function() {
+        timeout && clearTimeout(timeout);
+
+        timeout = setTimeout(function() {
+          const searchValue = searchDish.value;
+
+          if(searchValue === '') url.searchParams.delete('search');
+          else url.searchParams.set('search', searchValue);
+
+          window.location.href = url.toString();
+        }, 700);
+
+      })
+  
+      const headers = document.querySelectorAll('[data-slot="table-head"][data-sortable=true]');
+      headers.forEach(header => {
+          header.addEventListener('click', function() {
+              const sort = header.getAttribute('data-sort') === 'asc' ? 'desc' : 'asc';
+              const url = new URL(window.location.href);
+              url.searchParams.set('sortBy', header.getAttribute('data-header') || '');
+              url.searchParams.set('order', sort);
+              window.location.href = url.toString();
+          })
+      })
+  
+      const editButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="edit-"]');
+      editButtons.forEach(button => {
+          button.addEventListener('click', function() {
             const [_, id] = button.id.split('-');
-            const newEvent = new CustomEvent('delete-dish', {
-                detail: {
-                    id
-                }
-            });
-            document.dispatchEvent(newEvent);
-        })
-    })
-
-    const modal = document.querySelector('dialog[id="delete-dish"]') as HTMLDialogElement;
-    document.addEventListener('delete-dish', function(e: CustomEvent) {
-        modal?.showModal();
-
-        const deleteButton = modal?.querySelector('button[data-slot="delete-button"]');
-        const cancelButton = modal?.querySelector('button[data-slot="cancel-button"]');
-        const deletingMsg = modal?.querySelector('span[data-slot="deleting-msg"]');
-
-
-        deleteButton?.setAttribute('data-id', e.detail.id);
-        deleteButton?.addEventListener('click', async function() {
-          const dishId = deleteButton.getAttribute('data-id');
-
-          async function deleteDish(dishId: string) {
-
-              deleteButton?.setAttribute('disabled', 'true');
-              cancelButton?.setAttribute('disabled', 'true');
-              deletingMsg?.setAttribute('aria-hidden', 'false');
-
-              const response = await fetch(`/api/delete-dish`, {
-                method: "DELETE",
-                body: JSON.stringify({
-                  dishId
-                }),
-                
-                headers: {
-                  "Content-Type": "application/json",
-                },
+              window.location.href = `/dishes/${id}`;
+          })
+      })
+  
+      const deleteButtons = document.querySelectorAll('[data-slot="table-cell"] button[id^="delete-"]');
+      deleteButtons.forEach(button => {
+          button.addEventListener('click', function() {
+              const [_, id] = button.id.split('-');
+              const newEvent = new CustomEvent('delete-dish', {
+                  detail: {
+                      id
+                  }
               });
-          }
-
-          dishId && await deleteDish(dishId);
-
-          modal?.close();
-          window.location.reload();
-        })
-
-        cancelButton?.addEventListener('click', function() {
+              document.dispatchEvent(newEvent);
+          })
+      })
+  
+      const modal = document.querySelector('dialog[id="delete-dish"]') as HTMLDialogElement;
+      document.addEventListener('delete-dish', function(e: CustomEvent) {
+          modal?.showModal();
+  
+          const deleteButton = modal?.querySelector('button[data-slot="delete-button"]');
+          const cancelButton = modal?.querySelector('button[data-slot="cancel-button"]');
+          const deletingMsg = modal?.querySelector('span[data-slot="deleting-msg"]');
+  
+  
+          deleteButton?.setAttribute('data-id', e.detail.id);
+          deleteButton?.addEventListener('click', async function() {
+            const dishId = deleteButton.getAttribute('data-id');
+  
+            async function deleteDish(dishId: string) {
+  
+                deleteButton?.setAttribute('disabled', 'true');
+                cancelButton?.setAttribute('disabled', 'true');
+                deletingMsg?.setAttribute('aria-hidden', 'false');
+  
+                const response = await fetch(`/api/delete-dish`, {
+                  method: "DELETE",
+                  body: JSON.stringify({
+                    dishId
+                  }),
+                  
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                });
+            }
+  
+            dishId && await deleteDish(dishId);
+  
             modal?.close();
-        })
+            window.location.reload();
+          })
+  
+          cancelButton?.addEventListener('click', function() {
+              modal?.close();
+          })
+      })
     })
 </script>
