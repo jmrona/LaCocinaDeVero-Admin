@@ -42,15 +42,7 @@ export const prerender = false;
           Categorías
         </span>
         
-        <div class="bg-slate-300 grid grid-cols-3 rounded-sm w-full" aria-hidden="false">
-          {[{id:1, name: "option1"}, {id:2, name: "option2"}, {id:3, name: "option3"}].map((option) => (
-          <label class="badge badge-primary p-2"> 
-            <span class="bg-slate-500 px-2 py-1 flex rounded-sm text-white items-center justify-between">
-              {option.name} 
-              <input type="checkbox" name="categories" value={option.id} class="accent-primary">
-            </span>
-          </label>
-          ))}
+        <div id="categories-container" class="bg-slate-300 grid grid-cols-3 rounded-sm w-full">
         </div>
       </label>
       
@@ -59,18 +51,12 @@ export const prerender = false;
           Alérgenos
         </span>
         
-        <div class="bg-slate-300 grid grid-cols-3 rounded-sm w-full" aria-hidden="false">
-          {[{id:1, name: "option1"}, {id:2, name: "option2"}, {id:3, name: "option3"}].map((option) => (
-          <label class="badge badge-primary p-2"> 
-            <span class="bg-slate-500 px-2 py-1 flex rounded-sm text-white items-center justify-between">
-              {option.name} 
-              <input type="checkbox" name="allergens" value={option.id} class="accent-primary">
-            </span>
-          </label>
-          ))}
+        <div id="allergens-container" class="bg-slate-300 grid grid-cols-3 rounded-sm w-full">
+
         </div>
       </label>
     </div>
+
     <div class="flex-1/2 flex flex-col gap-4">
       <label for="upload-image-input" class="flex flex-col text-center gap-1">
         Foto del plato
@@ -80,7 +66,6 @@ export const prerender = false;
         <input type="file" id="upload-image-input" name="image" id="image" class="hidden" accept="image/*">
       </label>
     </div>
-    
   </form>
   <button type="submit" form="update-dish-form" class="btn mt-4"> 
     <Save size={20}/> Actualizar
@@ -108,13 +93,43 @@ export const prerender = false;
     
     const json = await response.json();
     const dish = json.dish;
-    console.log('dish: ', dish);
+
+    const categories = await fetch(`/api/get-categories`).then(response => response.json()).then(json => json.categories) ?? [];
+    const allergens = await fetch(`/api/get-allergens`).then(response => response.json()).then(json => json.allergens) ?? [];
     
     const form = document.querySelector("#update-dish-form");
     const dialog = document.querySelector("#error-dialog");
     const errorMsg = dialog.querySelector(".error-msg");
     const closeBtn = document.querySelector("#error-dialog [data-slot='close-button']");
     const imagePreview = document.querySelector("#image-preview img");
+    const categoriesContainer = document.querySelector("#categories-container");
+    const allergensContainer = document.querySelector("#allergens-container");
+
+    categories.forEach(element => {
+      const isChecked = dish.categories.some(category => category.category_id == element.category_id);
+
+      categoriesContainer.innerHTML += `
+        <label class="badge badge-primary p-2"> 
+          <span class="bg-slate-500 px-2 py-1 flex rounded-sm text-white items-center justify-between">
+            ${element.name.es}
+            <input type="checkbox" name="categories" value=${element.category_id} checked=${isChecked} class="accent-primary">
+          </span>
+        </label>
+      `
+    });
+
+    allergens.forEach(element => {
+      const isChecked = dish.allergens.some(allergen => allergen.allergen_id == element.allergen_id);
+
+      allergensContainer.innerHTML += `
+        <label class="badge badge-primary p-2"> 
+          <span class="bg-slate-500 px-2 py-1 flex rounded-sm text-white items-center justify-between">
+            ${element.name.es}
+            <input type="checkbox" name="allergens" value=${element.allergen_id} checked=${isChecked} class="accent-primary">
+          </span>
+        </label>
+      `
+    });
 
     closeBtn.addEventListener("click", function(e) {
       e.preventDefault();

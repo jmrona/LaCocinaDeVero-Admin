@@ -11,6 +11,7 @@ interface Dish {
   price: number;
   categories: number[];
   allergens: number[];
+  image: string;
 }
 
 export const POST: APIRoute = async ({ request }) => {
