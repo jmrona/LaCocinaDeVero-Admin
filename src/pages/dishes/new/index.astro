@@ -58,6 +58,9 @@ import {Save} from "@lucide/astro";
         </div>
         <input type="file" id="upload-image-input" name="image" id="image" class="hidden" accept="image/*">
       </label>
+      <label for="show-picture" class="text-sm text-gray-500 text-center flex items-center justify-center gap-2">Mostrar foto 
+        <input type="checkbox" name="show-picture" id="show-picture" class="accent-primary" checked>
+      </label>
     </div>
 
   </form>
@@ -86,7 +89,7 @@ import {Save} from "@lucide/astro";
     const dialog = document.querySelector("#error-dialog") as HTMLDialogElement;
     const errorMsg = dialog.querySelector(".error-msg") as HTMLDivElement;
 
-    const imagePreview = document.querySelector("#image-preview img");
+    const imagePreview = document.querySelector("#image-preview img") as HTMLImageElement;
     const categoriesContainer = document.querySelector("#categories-container") as HTMLDivElement;
     const allergensContainer = document.querySelector("#allergens-container") as HTMLDivElement;
 
@@ -131,7 +134,10 @@ import {Save} from "@lucide/astro";
       const price = parseFloat(data.get("price")?.toString() ?? "");
       const categories = Array.from(data.getAll("categories")).map(category => category);
       const allergens = Array.from(data.getAll("allergens")).map(allergen => allergen);
-      const image = imagePreview?.src ?? "/img/placeholder-image.webp";
+      const showPicture = data.get("show-picture")?.toString() === "on";
+      const picture = imagePreview?.src.includes("/img/placeholder-image.webp") ? "/img/placeholder-image.webp" : imagePreview?.src;
+      const image = showPicture ? picture : "";
+
 
       const response = await fetch(`/api/store-dish`, {
         method: "POST",
@@ -157,6 +163,27 @@ import {Save} from "@lucide/astro";
       }
 
       window.location.href = "/dishes";
+    })
+  })
+</script>
+
+<script type="module">
+  import {readFileAsBase64} from "/src/lib/readFileAsBase64";
+
+  document.addEventListener("DOMContentLoaded", async function(e) {
+    const imagePreview = document.querySelector("#image-preview");
+    const imageInput = document.querySelector("#upload-image-input");
+  
+    imageInput.addEventListener("change", async function(e) {
+      const file = e.target.files[0];
+      console.log('file: ', file);
+
+      if (!file) return;
+      const base64 = await readFileAsBase64(file, true);
+      const image = imagePreview.querySelector("img");
+      image.src = base64;
+
+
     })
   })
 </script>
