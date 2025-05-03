@@ -1,4 +1,4 @@
-export const readFileAsBase64 = (file: File, resize = false) =>
+export const readFileAsBase64 = (file, resize = false) =>
   new Promise((resolve, reject) => {
   if (!resize) {
     const reader = new FileReader();
@@ -32,7 +32,7 @@ export const readFileAsBase64 = (file: File, resize = false) =>
         resolve(base64);
       };
       img.onerror = reject;
-      img.src = e?.target?.result as string;
+      img.src = e?.target?.result;
     };
     
     reader.onerror = reject;
