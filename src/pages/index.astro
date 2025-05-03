@@ -1,10 +1,18 @@
 ---
+import Layout from '@/layouts/Layout.astro';
 import LayoutBasic from '../layouts/LayoutBasic.astro';
 import { SignedIn, SignedOut, UserButton, SignInButton, UserProfile, SignIn} from '@clerk/astro/components';
 ---
 
-<LayoutBasic>
-    <main class="flex flex-col items-center justify-center min-h-screen bg-neutral/80 text-neutral-100">
-        <SignIn/>
-    </main>
-</LayoutBasic>
+<SignedOut>
+    <LayoutBasic>
+        <main class="flex flex-col items-center justify-center min-h-screen bg-neutral/80 text-neutral-100">
+            <SignIn forceRedirectUrl={"/dishes"}/>
+        </main>
+    </LayoutBasic>
+</SignedOut>
+<SignedIn>
+    <Layout>
+        
+    </Layout>
+</SignedIn>
