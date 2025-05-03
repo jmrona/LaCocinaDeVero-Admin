@@ -1,4 +1,5 @@
 ---
+import Modal from "@/components/Modal.astro";
 import Pagination from "@/components/Pagination.astro";
 import Table, { type Action, type TableHeaders } from "@/components/Table.astro";
 import Layout from "@/layouts/Layout.astro";
@@ -11,12 +12,13 @@ let totalDishes = await getTotalDishes() as number;
 
 const page = Astro.url.searchParams.get('page') ?? '1';
 const perPage = Astro.url.searchParams.get('perPage') ?? '10';
-let totalPages = Math.floor(totalDishes / parseInt(perPage));
+let totalPages = Math.round(totalDishes / parseInt(perPage));
 
 
 const sortBy = Astro.url.searchParams.get('sortBy') || "name";
 const order = Astro.url.searchParams.get('order') || "asc";
 const search = Astro.url.searchParams.get('search') || undefined;
+const categoriesFilter = Astro.url.searchParams.get('cat') || undefined;
 
 let dishes = await getDishes(parseInt(page), parseInt(perPage), sortBy, order, search);
 
@@ -92,13 +94,14 @@ const actions: Action[] = [
         actions={actions} />
 
     {totalPages > 1 && <Pagination 
+        path="/dishes"
         page={parseInt(page)} 
         perPage={parseInt(perPage)} 
         totalPages={totalPages}
         className="mt-3" />}
 </Layout>
 
-<dialog id="delete-dish" class="modal">
+<Modal id="delete-dish">
   <form method="dialog" class="flex flex-col gap-4 px-8 py-12 bg-white rounded-lg drop-shadow-xl">
     <h3 class="text-lg font-medium leading-6 text-gray-900">¿Estás seguro de que deseas eliminar este plato?</h3>
     <div class="mt-2">
@@ -118,53 +121,15 @@ const actions: Action[] = [
       </button>
     </div>
   </form>
-</dialog>
+</Modal>
 
-<style>
-  dialog[open] {
-    position: fixed;
-    inset: 0;
-    margin: auto;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    outline: 0;
-    -webkit-overflow-scrolling: touch;
-    transition: all 0.1s linear;
-    border-radius: 16px;
-
-    @starting-style {
-      scale: 0.5;
-      opacity: 0;
-    }
-
-    &::backdrop {
-      opacity: 1;
-      transition: all 0.1s linear;
-
-      @starting-style {
-        opacity: 0;
-      }
-    }
-  }
-
-  dialog::backdrop {
-    /* @apply fixed inset-0 z-40 bg-black/50 */
-    position: fixed;
-    inset: 0;
-    z-index: 40;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
       const url = new URL(window.location.href);
       const search = url.searchParams.get('search');
 
-      const searchDish = document.querySelector('#search-dish');
+      const searchDish = document.querySelector('#search-dish') as HTMLInputElement;
       if(search) {
         searchDish.value = search;
         searchDish.focus();
@@ -172,19 +137,13 @@ const actions: Action[] = [
         url.searchParams.delete('search');
       }
 
-      let timeout: any;
       searchDish?.addEventListener('change', function() {
-        timeout && clearTimeout(timeout);
+        const searchValue = searchDish.value;
 
-        timeout = setTimeout(function() {
-          const searchValue = searchDish.value;
+        if(searchValue === '') url.searchParams.delete('search');
+        else url.searchParams.set('search', searchValue);
 
-          if(searchValue === '') url.searchParams.delete('search');
-          else url.searchParams.set('search', searchValue);
-
-          window.location.href = url.toString();
-        }, 700);
-
+        window.location.href = url.toString();
       })
   
       const headers = document.querySelectorAll('[data-slot="table-head"][data-sortable=true]');
