@@ -1,14 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { SignedIn, SignedOut, UserButton, SignInButton, UserProfile } from '@clerk/astro/components';
+import LayoutBasic from '../layouts/LayoutBasic.astro';
+import { SignedIn, SignedOut, UserButton, SignInButton, UserProfile, SignIn} from '@clerk/astro/components';
 ---
 
-<Layout>
-	<SignedIn>
-
-    </SignedIn>
-
-    <SignedOut>
-        <SignInButton />
-    </SignedOut>
-</Layout>
+<LayoutBasic>
+    <main class="flex flex-col items-center justify-center min-h-screen bg-neutral/80 text-neutral-100">
+        <SignIn/>
+    </main>
+</LayoutBasic>
