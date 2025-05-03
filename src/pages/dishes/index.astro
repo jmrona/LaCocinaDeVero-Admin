@@ -31,6 +31,11 @@ if(search) {
   totalDishes = dishes.length;
 }
 
+if (categoriesFilter && categoriesFilter.length > 0) {
+  totalPages = Math.floor(dishes.length / parseInt(perPage));
+  totalDishes = dishes.length;
+}
+
 const tableHeader: TableHeaders[] = [
     {
       label: "Nombre",
