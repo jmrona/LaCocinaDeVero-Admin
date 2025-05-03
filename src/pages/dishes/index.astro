@@ -3,9 +3,10 @@ import Modal from "@/components/Modal.astro";
 import Pagination from "@/components/Pagination.astro";
 import Table, { type Action, type TableHeaders } from "@/components/Table.astro";
 import Layout from "@/layouts/Layout.astro";
+import { getCategories } from "@/lib/getCategories";
 import { getDishes } from "@/lib/getDishes";
 import { getTotalDishes } from "@/lib/getTotalDishes";
-import { Pen, Trash, Plus } from "@lucide/astro";
+import { Pen, Trash, Plus, Funnel, Check } from "@lucide/astro";
 
 export const prerender = false;
 let totalDishes = await getTotalDishes() as number;
@@ -18,9 +19,11 @@ let totalPages = Math.round(totalDishes / parseInt(perPage));
 const sortBy = Astro.url.searchParams.get('sortBy') || "name";
 const order = Astro.url.searchParams.get('order') || "asc";
 const search = Astro.url.searchParams.get('search') || undefined;
-const categoriesFilter = Astro.url.searchParams.get('cat') || undefined;
+const categoriesFilter = Astro.url.searchParams.get('cat')?.split(',') || undefined;
 
-let dishes = await getDishes(parseInt(page), parseInt(perPage), sortBy, order, search);
+const categories = await getCategories(1, 100);
+
+let dishes = await getDishes(parseInt(page), parseInt(perPage), sortBy, order, search, categoriesFilter);
 
 if(search) {
   dishes = dishes.filter(dish => dish.name.es.toLowerCase().includes(search.toLowerCase()));
@@ -85,7 +88,32 @@ const actions: Action[] = [
         </a>
       </div>
     </div>
-    <input type="search" id="search-dish" name="search" placeholder="Buscar..." class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" />
+    <f class="relative flex gap-2">
+      <input type="search" id="search-dish" name="search" placeholder="Buscar..." class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" />
+      <button type="button" id="btn-filter" class="btn" data-slot="filter-btn">
+        <Funnel size={20}/>
+      </button>
+      <div id="filter-cat-container" class="absolute hidden bg-white shadow rounded-md z-10 right-14">
+        <form id="dishes-cat-filter" class="columns-2 gap-0" enctype="multipart/form-data">
+          {categories.map(cat => {
+            return (
+              <label class="flex gap-2 px-4 py-2 items-center border-b border-gray-300 cursor-pointer">
+                <input type="checkbox" name="categories" value={cat.category_id} class="accent-primary" checked={categoriesFilter?.some(category => category == cat.category_id)}>
+                <span class="text-sm text-gray-700">{cat.name.es}</span>
+              </label>
+            )
+          })}
+        </form>
+        <button type="submit" class="btn my-1 w-[calc(100%-8px)] mx-auto" form="dishes-cat-filter">
+          <Check size={20}/>
+          <span class="w-full text-center block">Filtrar por categoría</span>
+        </button>
+
+        <button id="clear-cat-filter-btn" type="button" class="text-primary bg-white btn my-1 w-[calc(100%-8px)] justify-center mx-auto">
+          Limpiar filtro
+        </button>
+      </div>
+    </f>
     
     <Table 
         data={dishes} 
@@ -220,4 +248,33 @@ const actions: Action[] = [
           })
       })
     })
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const url = new URL(window.location.href);
+
+    const btnFilter = document.querySelector('#btn-filter');
+    const filterModal = document.querySelector('#dishes-cat-filter');
+    const form = document.querySelector('#dishes-cat-filter') as HTMLFormElement;
+    const clearFilterBtn = document.querySelector('#clear-cat-filter-btn');
+
+    btnFilter?.addEventListener('click', function() {
+      filterModal?.closest("div#filter-cat-container")?.classList.toggle('hidden');
+    })
+
+    form?.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const data = new FormData(form);
+      const categories = [...new Set(Array.from(data.getAll("categories")).map(category => category))]; 
+      url.searchParams.set('cat', categories.join(','));
+      window.location.href = url.toString();
+    })
+
+    clearFilterBtn?.addEventListener('click', function() {
+      url.searchParams.delete('cat');
+      window.location.href = url.toString();
+    })
+  })
 </script>
