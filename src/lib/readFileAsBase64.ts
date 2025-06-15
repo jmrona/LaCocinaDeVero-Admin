@@ -1,3 +1,4 @@
+export const prerender = true;
 export const readFileAsBase64 = (file: File, resize = false) =>
   new Promise((resolve, reject) => {
   if (!resize) {
