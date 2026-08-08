@@ -609,6 +609,7 @@ export interface ApiDishDish extends Struct.CollectionTypeSchema {
     dish_id: Schema.Attribute.Integer &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    display_name: Schema.Attribute.String;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     image: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;

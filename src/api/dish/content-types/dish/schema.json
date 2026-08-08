@@ -21,6 +21,10 @@
       "unique": true,
       "required": true
     },
+    "display_name": {
+      "type": "string",
+      "description": "Nombre en español, solo para poder verlo y buscarlo en el listado. Se rellena automáticamente desde el campo `name`; no hace falta editarlo."
+    },
     "name": {
       "type": "json",
       "required": true
