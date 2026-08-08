@@ -615,7 +615,10 @@ export interface ApiDishDish extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::dish.dish'> &
       Schema.Attribute.Private;
-    name: Schema.Attribute.JSON & Schema.Attribute.Required;
+    name: Schema.Attribute.JSON;
+    name_de: Schema.Attribute.String;
+    name_en: Schema.Attribute.String;
+    name_es: Schema.Attribute.String & Schema.Attribute.Required;
     photo: Schema.Attribute.Media<'images'>;
     price: Schema.Attribute.Decimal & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;

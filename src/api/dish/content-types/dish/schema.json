@@ -25,9 +25,19 @@
       "type": "string",
       "description": "Nombre en español, solo para poder verlo y buscarlo en el listado. Se rellena automáticamente desde el campo `name`; no hace falta editarlo."
     },
+    "name_es": {
+      "type": "string",
+      "required": true
+    },
+    "name_en": {
+      "type": "string"
+    },
+    "name_de": {
+      "type": "string"
+    },
     "name": {
       "type": "json",
-      "required": true
+      "description": "Se compone automáticamente a partir de los tres nombres. No editar a mano."
     },
     "price": {
       "type": "decimal",
