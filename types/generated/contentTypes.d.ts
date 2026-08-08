@@ -467,6 +467,7 @@ export interface ApiAllergenAllergen extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     dishes: Schema.Attribute.Relation<'manyToMany', 'api::dish.dish'>;
+    display_name: Schema.Attribute.String;
     icon: Schema.Attribute.Enumeration<
       [
         'gluten',
@@ -563,6 +564,7 @@ export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     dishes: Schema.Attribute.Relation<'manyToMany', 'api::dish.dish'>;
+    display_name: Schema.Attribute.String;
     icon: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
@@ -606,9 +608,7 @@ export interface ApiDishDish extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    dish_id: Schema.Attribute.Integer &
-      Schema.Attribute.Required &
-      Schema.Attribute.Unique;
+    dish_id: Schema.Attribute.Integer & Schema.Attribute.Unique;
     display_name: Schema.Attribute.String;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     image: Schema.Attribute.String;

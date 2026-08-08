@@ -19,7 +19,7 @@
     "dish_id": {
       "type": "integer",
       "unique": true,
-      "required": true
+      "description": "Identificador interno. Se asigna solo al crear el plato; no hace falta rellenarlo."
     },
     "display_name": {
       "type": "string",

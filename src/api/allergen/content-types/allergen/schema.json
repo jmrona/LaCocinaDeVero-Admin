@@ -21,6 +21,10 @@
       "unique": true,
       "required": true
     },
+    "display_name": {
+      "type": "string",
+      "description": "Nombre en español. Es lo que se ve al asignar alérgenos a un plato. Se rellena automáticamente desde `name`."
+    },
     "name": {
       "type": "json",
       "required": true

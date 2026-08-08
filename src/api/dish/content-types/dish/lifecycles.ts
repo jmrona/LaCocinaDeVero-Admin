@@ -35,7 +35,26 @@ const syncDerivedFields = async (event: any) => {
   await strapi.db.query('api::dish.dish').update({ where: { id }, data: updates });
 };
 
+/**
+ * Assigns the next `dish_id` automatically.
+ *
+ * It's a legacy identifier the website still uses, but nobody creating a dish
+ * in the admin can be expected to know which number is free — and picking one
+ * that's taken would fail on the unique constraint.
+ */
+const assignDishId = async (event: any) => {
+  const data = event.params?.data;
+  if (!data || data.dish_id) return;
+
+  const [{ max }] = await strapi.db
+    .connection('cms_dishes')
+    .max('dish_id as max');
+
+  data.dish_id = (max ?? 0) + 1;
+};
+
 export default {
+  beforeCreate: assignDishId,
   afterCreate: syncDerivedFields,
   afterUpdate: syncDerivedFields,
 };
