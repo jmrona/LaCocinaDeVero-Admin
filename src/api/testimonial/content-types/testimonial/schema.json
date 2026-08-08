@@ -8,7 +8,7 @@
     "description": "Customer reviews shown on the home page. Previously hardcoded in the website's translation file."
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {
     "i18n": {
