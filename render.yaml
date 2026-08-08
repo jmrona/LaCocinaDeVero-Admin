@@ -1,0 +1,61 @@
+# Render blueprint for the Strapi CMS.
+#
+# The database and file storage both live in Supabase, so this service is
+# stateless — which is what makes Render's free tier viable here: it has no
+# persistent disk, and nothing here needs one.
+#
+# Note: on the free plan the service sleeps after 15 minutes of inactivity and
+# takes ~1 minute to wake. That only affects someone opening the admin panel;
+# the public website never talks to this service.
+services:
+  - type: web
+    name: lacocinadevero-cms
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    # --prod=false keeps devDependencies (typescript) installed: Render sets
+    # NODE_ENV=production, and `strapi build` needs them to compile.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm run build
+    startCommand: pnpm run start
+    healthCheckPath: /_health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: NODE_ENV
+        value: production
+      # Secrets are set in the Render dashboard, never committed here.
+      - key: APP_KEYS
+        sync: false
+      - key: API_TOKEN_SALT
+        sync: false
+      - key: ADMIN_JWT_SECRET
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TRANSFER_TOKEN_SALT
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: DATABASE_CLIENT
+        value: postgres
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: "true"
+      - key: DATABASE_SSL_REJECT_UNAUTHORIZED
+        value: "false"
+      - key: DATABASE_SCHEMA
+        value: public
+      - key: SUPABASE_STORAGE_ENDPOINT
+        sync: false
+      - key: SUPABASE_STORAGE_REGION
+        sync: false
+      - key: SUPABASE_STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: SUPABASE_STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: dishes
+      - key: SUPABASE_STORAGE_PUBLIC_URL
+        sync: false

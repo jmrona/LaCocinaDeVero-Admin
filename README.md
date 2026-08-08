@@ -37,6 +37,23 @@ Todas se documentan en `.env.example`. Las que hay que conseguir del panel de Su
 
 Los secretos (`APP_KEYS`, `JWT_SECRET`, …) se generan con `openssl rand -base64 32`.
 
+## Despliegue (Render)
+
+El repositorio incluye `render.yaml`, así que se despliega como *Blueprint*:
+
+1. En [dashboard.render.com](https://dashboard.render.com) → **New** → **Blueprint**.
+2. Conectar este repositorio; Render leerá `render.yaml`.
+3. Rellenar las variables marcadas como secretas (las mismas del `.env` local):
+   `APP_KEYS`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`, `JWT_SECRET`,
+   `TRANSFER_TOKEN_SALT`, `ENCRYPTION_KEY`, `DATABASE_URL`,
+   `SUPABASE_STORAGE_ENDPOINT`, `SUPABASE_STORAGE_REGION`,
+   `SUPABASE_STORAGE_ACCESS_KEY_ID`, `SUPABASE_STORAGE_SECRET_ACCESS_KEY`,
+   `SUPABASE_STORAGE_PUBLIC_URL`.
+
+En el plan gratuito el servicio se duerme tras 15 minutos sin uso y tarda
+alrededor de un minuto en despertar. Esto **solo** afecta a quien abre el panel:
+la web pública no pasa por aquí, lee Supabase directamente.
+
 ## Notas sobre la base de datos
 
 - Comparte la base de datos Postgres de Supabase con la web.
