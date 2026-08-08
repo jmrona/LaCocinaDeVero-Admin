@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cms_testimonials",
+  "info": {
+    "singularName": "testimonial",
+    "pluralName": "testimonials",
+    "displayName": "Testimonial",
+    "description": "Customer reviews shown on the home page. Previously hardcoded in the website's translation file."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "author": {
+      "type": "string",
+      "required": true
+    },
+    "quote": {
+      "type": "json",
+      "required": true
+    },
+    "sort_order": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}

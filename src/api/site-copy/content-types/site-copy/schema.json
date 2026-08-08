@@ -1,0 +1,59 @@
+{
+  "kind": "singleType",
+  "collectionName": "cms_site_copy",
+  "info": {
+    "singularName": "site-copy",
+    "pluralName": "site-copies",
+    "displayName": "Site copy",
+    "description": "All marketing text on the site, in es/en/de. Mirrors the sections of the website's translation file. Each field holds { es, en, de } keys."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nav": {
+      "type": "json",
+      "description": "Navigation labels: menu, about, contact"
+    },
+    "hero": {
+      "type": "json",
+      "description": "Home hero: title, subtitle"
+    },
+    "why_choose_us": {
+      "type": "json",
+      "description": "Why choose us section: title, subtitle, description and the three features"
+    },
+    "our_dishes": {
+      "type": "json",
+      "description": "Popular dishes section: title, description, allergens, loadMore"
+    },
+    "how_it_works": {
+      "type": "json",
+      "description": "How it works section: title, description and the three steps"
+    },
+    "testimonials_section": {
+      "type": "json",
+      "description": "Heading and description above the testimonials (the reviews themselves live in Testimonials)"
+    },
+    "cta": {
+      "type": "json",
+      "description": "Call to action: title, subtitle, button labels"
+    },
+    "footer": {
+      "type": "json",
+      "description": "Footer labels: description, menu, contact, hours headings"
+    },
+    "menu_page": {
+      "type": "json",
+      "description": "Menu page labels: specialMenu, categories, allergens, seeSpecialMenu"
+    },
+    "about_page": {
+      "type": "json",
+      "description": "About page: title, experience, contact, telephone, address labels"
+    },
+    "misc": {
+      "type": "json",
+      "description": "Modal close label, allergens info title"
+    }
+  }
+}

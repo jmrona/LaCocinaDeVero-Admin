@@ -1,0 +1,54 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cms_allergens",
+  "info": {
+    "singularName": "allergen",
+    "pluralName": "allergens",
+    "displayName": "Allergen",
+    "description": "Lives in cms_allergens; migrated once from legacy public.allergens, which is kept untouched as a backup. The icon field is a fixed key (e.g. \"gluten\", \"fish\") matched to a hardcoded SVG in the website code, not an uploaded image."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "allergen_id": {
+      "type": "integer",
+      "unique": true,
+      "required": true
+    },
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "icon": {
+      "type": "enumeration",
+      "enum": [
+        "gluten",
+        "crustaceans",
+        "eggs",
+        "fish",
+        "peanuts",
+        "soy",
+        "milk",
+        "nuts",
+        "celery",
+        "mustard",
+        "sesame",
+        "sulphur",
+        "lupin",
+        "mollusk"
+      ]
+    },
+    "dishes": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::dish.dish",
+      "mappedBy": "allergens"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cms_dishes",
+  "info": {
+    "singularName": "dish",
+    "pluralName": "dishes",
+    "displayName": "Dish",
+    "description": "Menu dishes. Lives in cms_dishes; data was migrated once from the legacy public.dishes table, which is kept untouched as a backup."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "dish_id": {
+      "type": "integer",
+      "unique": true,
+      "required": true
+    },
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "photo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"],
+      "description": "Upload the dish photo here. Its public URL is copied into the `image` field automatically, which is what the website reads."
+    },
+    "image": {
+      "type": "string",
+      "description": "Public image URL used by the website. Filled in automatically from `photo` - you normally don't edit this by hand."
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show this dish in the 'popular dishes' section on the home page. If no dish is featured, that whole section is hidden."
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::category.category",
+      "inversedBy": "dishes"
+    },
+    "allergens": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::allergen.allergen",
+      "inversedBy": "dishes"
+    }
+  }
+}

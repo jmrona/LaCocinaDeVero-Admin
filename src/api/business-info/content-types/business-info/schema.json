@@ -1,0 +1,60 @@
+{
+  "kind": "singleType",
+  "collectionName": "cms_business_info",
+  "info": {
+    "singularName": "business-info",
+    "pluralName": "business-infos",
+    "displayName": "Business info",
+    "description": "Phone, address, social links and opening hours. Single source of truth - these values are currently duplicated across the footer, the about page and the SEO structured data."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "phone": {
+      "type": "string",
+      "required": true
+    },
+    "phone_link": {
+      "type": "string",
+      "required": true,
+      "description": "Same number in tel: format, e.g. +34652640538"
+    },
+    "address": {
+      "type": "text",
+      "required": true
+    },
+    "maps_url": {
+      "type": "string"
+    },
+    "instagram_url": {
+      "type": "string"
+    },
+    "hours_weekdays_label": {
+      "type": "json",
+      "description": "{ es, en, de } e.g. \"Lunes a viernes\""
+    },
+    "hours_weekdays_value": {
+      "type": "string",
+      "description": "e.g. 12:00 - 16:30"
+    },
+    "hours_weekends_label": {
+      "type": "json"
+    },
+    "hours_weekends_value": {
+      "type": "string"
+    },
+    "hours_closed_label": {
+      "type": "json",
+      "description": "{ es, en, de } e.g. \"Martes\""
+    },
+    "hours_closed_value": {
+      "type": "json",
+      "description": "{ es, en, de } e.g. \"Cerrado\""
+    },
+    "opening_hours_schema": {
+      "type": "json",
+      "description": "schema.org openingHours array for SEO, e.g. [\"Mo 12:00-16:30\", \"We-Su 12:00-16:30\"]"
+    }
+  }
+}

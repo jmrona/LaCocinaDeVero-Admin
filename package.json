@@ -1,34 +1,44 @@
 {
-  "name": "",
-  "type": "module",
-  "version": "0.0.1",
+  "name": "cms",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Strapi application",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "build": "strapi build",
+    "console": "strapi console",
+    "deploy": "strapi deploy",
+    "dev": "strapi develop",
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
-    "@astrojs/react": "^4.2.5",
-    "@astrojs/vercel": "^8.1.4",
-    "@clerk/astro": "^2.6.8",
-    "@clerk/localizations": "^3.14.4",
-    "@fontsource-variable/inter": "^5.2.5",
-    "@lucide/astro": "^0.503.0",
-    "@supabase/supabase-js": "^2.49.4",
-    "@tailwindcss/vite": "^4.1.4",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "astro": "^5.7.5",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.503.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tailwind-merge": "^3.2.0",
-    "tailwindcss": "^4.1.4"
+    "@strapi/database": "5.51.2",
+    "@strapi/plugin-cloud": "5.51.2",
+    "@strapi/plugin-users-permissions": "5.51.2",
+    "@strapi/provider-upload-aws-s3": "^5.51.2",
+    "@strapi/strapi": "5.51.2",
+    "better-sqlite3": "12.8.0",
+    "pg": "^8.22.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.0.0"
   },
   "devDependencies": {
-    "tw-animate-css": "^1.2.8"
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "uuid": "a01e740a-60e0-4e1f-a625-19c7575c7a1b",
+    "installId": "000e07a3dc6e77a4729d89a829fa3cd22e2ef0be82178fff4c08642ef24ac1d3"
   }
 }

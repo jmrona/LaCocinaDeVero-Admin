@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "cms_categories",
+  "info": {
+    "singularName": "category",
+    "pluralName": "categories",
+    "displayName": "Category",
+    "description": "Menu categories AND days-of-week entries used for the daily menu feature. Lives in cms_categories; migrated once from legacy public.categories, which is kept untouched as a backup."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "category_id": {
+      "type": "integer",
+      "unique": true,
+      "required": true
+    },
+    "name": {
+      "type": "json",
+      "required": true
+    },
+    "icon": {
+      "type": "string"
+    },
+    "dishes": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::dish.dish",
+      "mappedBy": "categories"
+    }
+  }
+}
